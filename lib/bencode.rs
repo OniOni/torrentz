@@ -1,7 +1,33 @@
-use std::str::Chars;
-use std::string;
+use std::fmt::{Formatter, Result};
+use std::fmt::Debug;
 
-fn bdecode_string(it: &mut Chars, char1: char) {
+use std::str::Chars;
+use std::collections::BTreeMap;
+
+pub enum Bencoded {
+    String(String),
+    Object(self::Object),
+    Array(self::Array),
+    U64(u64),
+    Null
+}
+
+pub type Array = Vec<Bencoded>;
+pub type Object = BTreeMap<String, Bencoded>;
+
+impl Debug for Bencoded {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        match *self {
+            Bencoded::String(ref string) => String::fmt(string, f),
+            Bencoded::Object(ref obj) => BTreeMap::fmt(obj, f),
+            Bencoded::U64(ref int) => Debug::fmt(int, f),
+            Bencoded::Array(ref ar) => Debug::fmt(ar, f),
+            _ => panic!("Noooo!")
+        }
+    }
+}
+
+fn bdecode_string(it: &mut Chars, char1: char) -> String {
     let mut str_len = "".to_string();
     let mut string = "".to_string();
 
@@ -16,8 +42,6 @@ fn bdecode_string(it: &mut Chars, char1: char) {
         None => panic!("Could not find string length...")
     };
 
-    println!("String length {}", len);
-
     for c in it.take(len) {
         match c {
             ':' => continue,
@@ -25,43 +49,54 @@ fn bdecode_string(it: &mut Chars, char1: char) {
         }
     }
 
-    println!("Decoded string: {}", string);
+    return string;
 }
 
-fn parse_dict(it: &mut Chars) {
+fn bdecode_dict(it: &mut Chars) -> Bencoded {
+    let mut obj = BTreeMap::new();
+
     loop {
         match it.next() {
             Some('e') => {
                 break;
             },
             Some(c) => {
-                bdecode_string(it, c);
-                bdecode_inner(it);
+                let key = bdecode_string(it, c);
+                let val = bdecode_inner(it);
+                obj.insert(key, val);
             },
             None => panic!("Reached end of string!")
         };
     }
+
+    return Bencoded::Object(obj);
 }
 
-fn bdecode_inner(it: &mut Chars) {
+fn bdecode_inner(it: &mut Chars) -> Bencoded {
     match it.next() {
-        Some('d') => parse_dict(it),
+        Some('d') => bdecode_dict(it),
         // 'l' => parse_list(&mut it),
         // 'i' => parse_int(&mut it),
-        Some(len) => bdecode_string(it, len),
-        None => ()
-    };
+        Some(len) => Bencoded::String(bdecode_string(it, len)),
+        None => Bencoded::Null
+    }
 }
 
-fn bdecode(bencode: &str) {
+fn bdecode(bencode: &str) -> Bencoded {
     let mut it = bencode.chars();
-    bdecode_inner(&mut it);
+    return bdecode_inner(&mut it);
 }
 
 fn main() {
     let string = "4:abce".to_string();
-    bdecode(&string);
+    let res = bdecode(&string);
+    println!("{:?}", res);
 
     let string2 = "d5:abcea1:ae";
-    bdecode(&string2);
+    let res2 = bdecode(&string2);
+    println!("{:?}", res2);
+
+    let string3 = "d5:abcea1:a3:cde1:ee";
+    let res3 = bdecode(&string3);
+    println!("{:?}", res3);
 }
