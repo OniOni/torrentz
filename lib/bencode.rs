@@ -62,7 +62,7 @@ fn bdecode_dict(it: &mut Chars) -> Bencoded {
             },
             Some(c) => {
                 let key = bdecode_string(it, c);
-                let val = bdecode_inner(it);
+                let val = bdecode_value(it);
                 obj.insert(key, val);
             },
             None => panic!("Reached end of string!")
@@ -72,19 +72,41 @@ fn bdecode_dict(it: &mut Chars) -> Bencoded {
     return Bencoded::Object(obj);
 }
 
-fn bdecode_inner(it: &mut Chars) -> Bencoded {
-    match it.next() {
-        Some('d') => bdecode_dict(it),
-        // 'l' => parse_list(&mut it),
+fn bdecode_list(it: &mut Chars) -> Bencoded {
+    let mut ar: Array = vec![bdecode_value(it)];
+
+    loop {
+        match it.next() {
+            Some('e') => break,
+            Some(c) => {
+                ar.push(bdecode_match(c, it));
+            },
+            None => panic!("Reached end of string while parsing list.")
+        }
+    }
+
+    return Bencoded::Array(ar);
+}
+
+fn bdecode_match(c: char, it: &mut Chars) -> Bencoded {
+    match c {
+        'd' => bdecode_dict(it),
+        'l' => bdecode_list(it),
         // 'i' => parse_int(&mut it),
-        Some(len) => Bencoded::String(bdecode_string(it, len)),
-        None => Bencoded::Null
+        c => Bencoded::String(bdecode_string(it, c)),
+    }
+}
+
+fn bdecode_value(it: &mut Chars) -> Bencoded {
+    match it.next() {
+        Some(c) => bdecode_match(c, it),
+        None => Bencoded::Null,
     }
 }
 
 fn bdecode(bencode: &str) -> Bencoded {
     let mut it = bencode.chars();
-    return bdecode_inner(&mut it);
+    return bdecode_value(&mut it);
 }
 
 fn main() {
@@ -99,4 +121,8 @@ fn main() {
     let string3 = "d5:abcea1:a3:cde1:ee";
     let res3 = bdecode(&string3);
     println!("{:?}", res3);
+
+    let string4 = "l1:a1:bd3:key5:valueee";
+    let res4 = bdecode(&string4);
+    println!("{:?}", res4);
 }
