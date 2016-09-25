@@ -88,11 +88,31 @@ fn bdecode_list(it: &mut Chars) -> Bencoded {
     return Bencoded::Array(ar);
 }
 
+fn bdecode_int(it: &mut Chars) -> Bencoded {
+    let mut acc = "".to_string();
+
+    loop {
+        match it.next() {
+            Some('e') => break,
+            Some(c) => {
+                acc.push(c);
+                println!("acc: {}", acc);
+            },
+            None => panic!("Reached end of string while parsing int.")
+        }
+    }
+
+    match acc.parse::<u64>().ok() {
+        Some(i) => return Bencoded::U64(i),
+        None => panic!("Not int to parse.")
+    }
+}
+
 fn bdecode_match(c: char, it: &mut Chars) -> Bencoded {
     match c {
         'd' => bdecode_dict(it),
         'l' => bdecode_list(it),
-        // 'i' => parse_int(&mut it),
+        'i' => bdecode_int(it),
         c => Bencoded::String(bdecode_string(it, c)),
     }
 }
@@ -125,4 +145,8 @@ fn main() {
     let string4 = "l1:a1:bd3:key5:valueee";
     let res4 = bdecode(&string4);
     println!("{:?}", res4);
+
+    let string5 = "l1:a1:bd3:key5:value2:p1i5e2:p2i3eee";
+    let res5 = bdecode(&string5);
+    println!("{:?}", res5);
 }
