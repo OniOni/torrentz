@@ -124,29 +124,33 @@ fn bdecode_value(it: &mut Chars) -> Bencoded {
     }
 }
 
-fn bdecode(bencode: &str) -> Bencoded {
+pub fn bdecode(bencode: &str) -> Bencoded {
     let mut it = bencode.chars();
     return bdecode_value(&mut it);
 }
 
-fn main() {
-    let string = "4:abce".to_string();
-    let res = bdecode(&string);
-    println!("{:?}", res);
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn it_works() {
+        let string = "4:abce".to_string();
+        let res = bdecode(&string);
+        println!("{:?}", res);
 
-    let string2 = "d5:abcea1:ae";
-    let res2 = bdecode(&string2);
-    println!("{:?}", res2);
+        let string2 = "d5:abcea1:ae";
+        let res2 = bdecode(&string2);
+        println!("{:?}", res2);
 
-    let string3 = "d5:abcea1:a3:cde1:ee";
-    let res3 = bdecode(&string3);
-    println!("{:?}", res3);
+        let string3 = "d5:abcea1:a3:cde1:ee";
+        let res3 = bdecode(&string3);
+        println!("{:?}", res3);
 
-    let string4 = "l1:a1:bd3:key5:valueee";
-    let res4 = bdecode(&string4);
-    println!("{:?}", res4);
+        let string4 = "l1:a1:bd3:key5:valueee";
+        let res4 = bdecode(&string4);
+        println!("{:?}", res4);
 
-    let string5 = "l1:a1:bd3:key5:value2:p1i5e2:p2i3eee";
-    let res5 = bdecode(&string5);
-    println!("{:?}", res5);
+        let string5 = "l1:a1:bd3:key5:value2:p1i5e2:p2i3eee";
+        let res5 = bdecode(&string5);
+        println!("{:?}", res5);
+    }
 }

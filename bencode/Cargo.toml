@@ -1,11 +1,6 @@
 [package]
-name = "torrentz"
+name = "bencode"
 version = "0.1.0"
 authors = ["mathieu <mathieu.c.sabourin@gmail.com>"]
 
 [dependencies]
-bencode = { path  = "bencode" }
-
-[[bin]]
-name = "torrentz"
-path = "main.rs"

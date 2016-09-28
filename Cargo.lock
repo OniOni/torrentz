@@ -1,0 +1,11 @@
+[root]
+name = "torrentz"
+version = "0.1.0"
+dependencies = [
+ "bencode 0.1.0",
+]
+
+[[package]]
+name = "bencode"
+version = "0.1.0"
+
