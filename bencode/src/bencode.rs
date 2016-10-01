@@ -54,11 +54,12 @@ fn bdecode_string(it: &mut Chars, char1: char) -> String {
 
 fn bdecode_dict(it: &mut Chars) -> Bencoded {
     let mut obj = BTreeMap::new();
+    let mut done = false;
 
-    loop {
+    while !done {
         match it.next() {
             Some('e') => {
-                break;
+                done = true;
             },
             Some(c) => {
                 let key = bdecode_string(it, c);
@@ -74,10 +75,11 @@ fn bdecode_dict(it: &mut Chars) -> Bencoded {
 
 fn bdecode_list(it: &mut Chars) -> Bencoded {
     let mut ar: Array = vec![bdecode_value(it)];
+    let mut done = false;
 
-    loop {
+    while !done {
         match it.next() {
-            Some('e') => break,
+            Some('e') => done = true,
             Some(c) => {
                 ar.push(bdecode_match(c, it));
             },
@@ -90,10 +92,11 @@ fn bdecode_list(it: &mut Chars) -> Bencoded {
 
 fn bdecode_int(it: &mut Chars) -> Bencoded {
     let mut acc = "".to_string();
+    let mut done = false;
 
-    loop {
+    while !done {
         match it.next() {
-            Some('e') => break,
+            Some('e') => done = true,
             Some(c) => {
                 acc.push(c);
                 println!("acc: {}", acc);
