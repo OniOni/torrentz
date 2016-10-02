@@ -97,10 +97,7 @@ fn bdecode_int(it: &mut Chars) -> Bencoded {
     while !done {
         match it.next() {
             Some('e') => done = true,
-            Some(c) => {
-                acc.push(c);
-                println!("acc: {}", acc);
-            },
+            Some(c) => acc.push(c),
             None => panic!("Reached end of string while parsing int.")
         }
     }
