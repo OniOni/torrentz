@@ -127,7 +127,7 @@ fn bdecode_value(it: &mut Chars) -> Bencoded {
     }
 }
 
-pub fn bdecode(bencode: &str) -> Bencoded {
+pub fn parse(bencode: &str) -> Bencoded {
     let mut it = bencode.chars();
     return bdecode_value(&mut it);
 }
