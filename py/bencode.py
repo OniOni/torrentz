@@ -65,6 +65,29 @@ def loads(s):
 def load(f):
     return parse_element(bytes_iter(f.read()))
 
+def dumps(bencode):
+    s = "{s}{v}e"
+    if isinstance(bencode, dict):
+        vals = {
+            's': 'd',
+            'v': "".join([dumps(x) for item in  bencode.items()
+                          for x in item])
+        }
+    elif isinstance(bencode, list):
+        vals = {
+            's': 'l',
+            'v': "".join(map(dumps, bencode))
+        }
+    elif isinstance(bencode, int):
+        vals = {
+            's': 'i',
+            'v': bencode
+        }
+    else:
+        return "{}:{}".format(len(bencode), bencode)
+
+    return s.format(**vals)
+
 if __name__ == '__main__':
     s = b"d5:helloi42e2:hili1ei2eee" # {'hello': 42, 'hi': [1, 2]}
     r = loads(s)
