@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 def parse_string(ite, c):
     s = b""
     while c != b':':
@@ -20,7 +22,7 @@ def parse_int(ite):
         s += c
 
 def parse_dict(ite):
-    r = {}
+    r = OrderedDict()
     while True:
         c = next(ite)
         if c == b'e':
@@ -66,34 +68,32 @@ def load(f):
     return parse_element(bytes_iter(f.read()))
 
 def dumps(bencode):
-    s = "{s}{v}e"
     if isinstance(bencode, dict):
-        vals = {
-            's': 'd',
-            'v': "".join([dumps(x) for item in  bencode.items()
+        s = b'd'
+        v = b"".join([dumps(x) for item in bencode.items()
                           for x in item])
-        }
     elif isinstance(bencode, list):
-        vals = {
-            's': 'l',
-            'v': "".join(map(dumps, bencode))
-        }
+        s =  b'l'
+        v =  b"".join(map(dumps, bencode))
     elif isinstance(bencode, int):
-        vals = {
-            's': 'i',
-            'v': bencode
-        }
+        s = b'i'
+        v = bytes(str(bencode), 'utf8')
     else:
-        return "{}:{}".format(len(bencode), bencode)
+        return bytes(str(len(bencode)), 'utf8') + b':' + bytes(bencode)
 
-    return s.format(**vals)
+    return s + v + b'e'
 
 if __name__ == '__main__':
-    s = b"d5:helloi42e2:hili1ei2eee" # {'hello': 42, 'hi': [1, 2]}
+    print("d5:helloi42e2:hili1ei2eee")
+    s = b"d5:helloi42e2:hili1ei2eee"
     r = loads(s)
-    print(r)
+    print('->', r)
 
     with open('ubuntu-16.04-server-amd64.iso.torrent', 'rb') as f:
-        r = load(f)
+        meta = load(f)
 
-    #print(r)
+    print("{'hello': 42, 'hi': [1, 2]}")
+    b = dumps(r)
+    print('->', b)
+
+    print(dumps(meta[b'info']))
