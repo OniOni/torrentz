@@ -3,7 +3,7 @@ import hashlib
 from . import bencode
 
 PROTO_STR = b"BitTorrent protocol"
-PROTO_STR_LEN = bytes("{:0=4}".format(len(PROTO_STR)), 'utf8')
+PROTO_STR_LEN = bytes("{}".format(chr(len(PROTO_STR))), 'utf8')
 
 
 class Client(object):
@@ -18,9 +18,15 @@ class Client(object):
 
         digest = s.digest()
         return (PROTO_STR_LEN + PROTO_STR +
-                bytes("{:0=8}".format(0), 'utf') +
+                bytes(chr(0) * 8, 'utf') +
                 digest +
                 b"-MS0000-000000000000")
+
+    def handle_handshake(self, msg):
+        print(msg)
+
+    def mk_announce_msg(self):
+        pass
 
 
 if __name__ == '__main__':
